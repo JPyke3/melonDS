@@ -2,31 +2,25 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <string>
 #include <vector>
 
-class DrmLease
+class DrmLeaseOutput
 {
 public:
-    DrmLease() = default;
-    ~DrmLease();
+    explicit DrmLeaseOutput(int leaseFd) : leaseFd(leaseFd) {}
+    ~DrmLeaseOutput();
 
-    DrmLease(const DrmLease&) = delete;
-    DrmLease& operator=(const DrmLease&) = delete;
-
-    bool Connect(const std::string& socketPath);
+    DrmLeaseOutput(const DrmLeaseOutput&) = delete;
+    DrmLeaseOutput& operator=(const DrmLeaseOutput&) = delete;
 
     bool IsValid() const { return leaseFd >= 0; }
     int GetFd() const { return leaseFd; }
 
     void PrintResources() const;
-
     bool InitializeOutput();
-
     void PresentBottomScreen(const uint32_t* pixels);
 
 private:
-    int socketFd = -1;
     int leaseFd = -1;
 
     void* scanoutMemory = nullptr;

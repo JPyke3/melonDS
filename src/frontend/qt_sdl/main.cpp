@@ -65,7 +65,10 @@
 #include "Net_PCap.h"
 #include "Net_Slirp.h"
 
-#include "DrmLease.h"
+#include <memory>
+
+#include "DrmLeaseOutput.h"
+#include "DrmLeaseSocket.h"
 
 using namespace melonDS;
 
@@ -333,19 +336,25 @@ int main(int argc, char** argv)
 
     CLI::CommandLineOptions* options = CLI::ManageArgs(melon);
 
-    DrmLease drmLease;
-    bool drmOutputActive = false;
+    DrmLeaseSocket drmLeaseSocket;
+    std::unique_ptr<DrmLeaseOutput> drmLeaseOutput;
 
     if (const char* leaseSocket = std::getenv("MELONDS_DRM_LEASE_SOCKET"))
     {
-        if (!drmLease.Connect(leaseSocket))
+        if (!drmLeaseSocket.Connect(leaseSocket))
         {
             std::fprintf(stderr, "[drm-lease] failed to acquire DRM lease\n");
         }
         else
         {
-            drmLease.PrintResources();
-            drmOutputActive = drmLease.InitializeOutput();
+            drmLeaseOutput = std::make_unique<DrmLeaseOutput>(
+                drmLeaseSocket.TakeLeaseFd()
+            );
+
+            drmLeaseOutput->PrintResources();
+
+            if (!drmLeaseOutput->InitializeOutput())
+                drmLeaseOutput.reset();
         }
     }
 
@@ -416,8 +425,8 @@ int main(int argc, char** argv)
 
     {
         MainWindow* win = emuInstances[0]->getMainWindow();
-        if (drmOutputActive)
-            win->setDrmLease(&drmLease);
+        if (drmLeaseOutput)
+            win->setDrmLeaseOutput(drmLeaseOutput.get());
         bool memberSyntaxUsed = false;
         const auto prepareRomPath = [&](const std::optional<QString> &romPath,
                                         const std::optional<QString> &romArchivePath) -> QStringList

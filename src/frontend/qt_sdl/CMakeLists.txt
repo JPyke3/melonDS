@@ -4,8 +4,10 @@ include(FixInterfaceIncludes)
 
 set(SOURCES_QT_SDL
     main.cpp
-    DrmLease.cpp
-    DrmLease.h
+    DrmLeaseOutput.cpp
+    DrmLeaseOutput.h
+    DrmLeaseSocket.cpp
+    DrmLeaseSocket.h
     main_shaders.h
     Screen.cpp
     Window.cpp
