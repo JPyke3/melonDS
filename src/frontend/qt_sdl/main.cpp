@@ -65,6 +65,8 @@
 #include "Net_PCap.h"
 #include "Net_Slirp.h"
 
+#include "DrmLease.h"
+
 using namespace melonDS;
 
 QString* systemThemeName;
@@ -330,6 +332,21 @@ int main(int argc, char** argv)
     pathInit();
 
     CLI::CommandLineOptions* options = CLI::ManageArgs(melon);
+
+    DrmLease drmLease;
+
+    if (const char* leaseSocket = std::getenv("MELONDS_DRM_LEASE_SOCKET"))
+    {
+        if (!drmLease.Connect(leaseSocket))
+        {
+            std::fprintf(stderr, "[drm-lease] failed to acquire DRM lease\n");
+        }
+        else
+        {
+            drmLease.PrintResources();
+            drmLease.ShowTestPattern();
+        }
+    }
 
     // http://stackoverflow.com/questions/14543333/joystick-wont-work-using-sdl
     SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");

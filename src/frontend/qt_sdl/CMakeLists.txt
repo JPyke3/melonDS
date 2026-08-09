@@ -4,6 +4,8 @@ include(FixInterfaceIncludes)
 
 set(SOURCES_QT_SDL
     main.cpp
+    DrmLease.cpp
+    DrmLease.h
     main_shaders.h
     Screen.cpp
     Window.cpp
@@ -88,6 +90,10 @@ pkg_check_modules(LibArchive REQUIRED IMPORTED_TARGET libarchive)
 pkg_check_modules(Zstd REQUIRED IMPORTED_TARGET libzstd)
 pkg_check_modules(Faad REQUIRED IMPORTED_TARGET faad2)
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    pkg_check_modules(LibDRM REQUIRED IMPORTED_TARGET libdrm)
+endif()
+
 fix_interface_includes(PkgConfig::SDL2 PkgConfig::LibArchive)
 
 add_compile_definitions(ARCHIVE_SUPPORT_ENABLED)
@@ -98,6 +104,10 @@ add_subdirectory("../../net"
     ${CMAKE_BINARY_DIR}/net)
 
 target_link_libraries(melonDS PRIVATE net-utils)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_link_libraries(melonDS PRIVATE PkgConfig::LibDRM)
+endif()
 
 if (WIN32)
     target_link_libraries(melonDS PUBLIC opengl32)

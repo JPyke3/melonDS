@@ -44,6 +44,8 @@
 #include "font.h"
 #include "version.h"
 
+#include "DrmLease.h"
+
 using namespace melonDS;
 
 #if !defined(_WIN32) && !defined(APPLE)
@@ -813,6 +815,13 @@ void ScreenPanelNative::paintEvent(QPaintEvent* event)
         {
             memcpy(screen[0].scanLine(0), topBuffer, 256 * 192 * 4);
             memcpy(screen[1].scanLine(0), bottomBuffer, 256 * 192 * 4);
+
+            if (auto* lease = DrmLease::Active())
+            {
+                lease->PresentBottomScreen(
+                    static_cast<const uint32_t*>(bottomBuffer)
+                );
+            }
         }
         bufferLock.unlock();
 
