@@ -16,6 +16,9 @@
 DrmLeaseOutput::~DrmLeaseOutput()
 {
 #ifdef __linux__
+    if (scanoutMemory)
+        munmap(scanoutMemory, scanoutSize);
+
     if (leaseFd >= 0)
         close(leaseFd);
 #endif

@@ -130,4 +130,3 @@ bool DrmLeaseSocket::Connect(const std::string& socketPath)
     return leaseFd >= 0;
 #endif
 }
-
