@@ -40,6 +40,7 @@
 
 class EmuInstance;
 class EmuThread;
+class DrmLease;
 
 const int kMaxRecentROMs = 10;
 
@@ -87,6 +88,9 @@ public:
 
     void loadRecentFilesMenu(bool loadcfg);
     //void updateVideoSettings(bool glchange);
+
+    DrmLease* getDrmLease() { return drmLease; }
+    void setDrmLease(DrmLease* lease) { drmLease = lease; }
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;
@@ -217,6 +221,7 @@ private:
 
     EmuInstance* emuInstance;
     EmuThread* emuThread;
+    DrmLease* drmLease = nullptr;
 
     Config::Table& globalCfg;
     Config::Table& localCfg;

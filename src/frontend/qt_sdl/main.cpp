@@ -334,6 +334,7 @@ int main(int argc, char** argv)
     CLI::CommandLineOptions* options = CLI::ManageArgs(melon);
 
     DrmLease drmLease;
+    bool drmOutputActive = false;
 
     if (const char* leaseSocket = std::getenv("MELONDS_DRM_LEASE_SOCKET"))
     {
@@ -344,7 +345,7 @@ int main(int argc, char** argv)
         else
         {
             drmLease.PrintResources();
-            drmLease.ShowTestPattern();
+            drmOutputActive = drmLease.InitializeOutput();
         }
     }
 
@@ -415,6 +416,8 @@ int main(int argc, char** argv)
 
     {
         MainWindow* win = emuInstances[0]->getMainWindow();
+        if (drmOutputActive)
+            win->setDrmLease(&drmLease);
         bool memberSyntaxUsed = false;
         const auto prepareRomPath = [&](const std::optional<QString> &romPath,
                                         const std::optional<QString> &romArchivePath) -> QStringList

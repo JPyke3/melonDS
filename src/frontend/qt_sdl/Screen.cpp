@@ -816,7 +816,7 @@ void ScreenPanelNative::paintEvent(QPaintEvent* event)
             memcpy(screen[0].scanLine(0), topBuffer, 256 * 192 * 4);
             memcpy(screen[1].scanLine(0), bottomBuffer, 256 * 192 * 4);
 
-            if (auto* lease = DrmLease::Active())
+            if (auto* lease = mainWindow->getDrmLease())
             {
                 lease->PresentBottomScreen(
                     static_cast<const uint32_t*>(bottomBuffer)

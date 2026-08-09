@@ -21,20 +21,13 @@ public:
 
     void PrintResources() const;
 
-    bool ShowTestPattern();
+    bool InitializeOutput();
 
     void PresentBottomScreen(const uint32_t* pixels);
-
-    static DrmLease* Active()
-    {
-        return activeLease;
-    }
 
 private:
     int socketFd = -1;
     int leaseFd = -1;
-
-    static DrmLease* activeLease;
 
     void* scanoutMemory = nullptr;
     std::size_t scanoutSize = 0;

@@ -15,14 +15,9 @@
 #include <unistd.h>
 #endif
 
-DrmLease* DrmLease::activeLease = nullptr;
-
 DrmLease::~DrmLease()
 {
 #ifdef __linux__
-    if (activeLease == this)
-        activeLease = nullptr;
-
     if (scanoutMemory)
         munmap(scanoutMemory, scanoutSize);
 
@@ -202,9 +197,6 @@ bool DrmLease::Connect(const std::string& socketPath)
         leaseFd
     );
 
-    if (leaseFd >= 0)
-        activeLease = this;
-
     return leaseFd >= 0;
 #endif
 }
@@ -337,7 +329,7 @@ void DrmLease::PrintResources() const
 #endif
 }
 
-bool DrmLease::ShowTestPattern()
+bool DrmLease::InitializeOutput()
 {
 #ifndef __linux__
     return false;
@@ -429,7 +421,7 @@ bool DrmLease::ShowTestPattern()
 
     std::fprintf(
         stderr,
-        "[drm-lease] test output: %ux%u, connector=%u crtc=%u plane=%u\n",
+        "[drm-lease] output: %ux%u, connector=%u crtc=%u plane=%u\n",
         width,
         height,
         connectorId,
@@ -498,20 +490,9 @@ bool DrmLease::ShowTestPattern()
         return false;
     }
 
-    //
-    // The pinnacle of computer graphics:
-    // paint every pixel magenta.
-    //
+    // Start with a black framebuffer until the first DS frame arrives.
+    std::memset(memory, 0, dumb.size);
 
-    for (uint32_t y = 0; y < height; y++)
-    {
-        auto* row = reinterpret_cast<uint32_t*>(
-            static_cast<uint8_t*>(memory) + y * dumb.pitch
-        );
-
-        for (uint32_t x = 0; x < width; x++)
-            row[x] = 0x00FF00FF;
-    }
 
     scanoutMemory = memory;
     scanoutSize = dumb.size;
@@ -707,7 +688,7 @@ bool DrmLease::ShowTestPattern()
     }
 
     std::fprintf(stderr, "[drm-lease] atomic test passed\n");
-    std::fprintf(stderr, "[drm-lease] committing test pattern...\n");
+    std::fprintf(stderr, "[drm-lease] committing initial framebuffer...\n");
 
     //
     // Actually do it.
@@ -789,7 +770,7 @@ bool DrmLease::ShowTestPattern()
 
     std::fprintf(
         stderr,
-        "[drm-lease] TEST PATTERN ACTIVE\n"
+        "[drm-lease] output active\n"
     );
 
     return true;
